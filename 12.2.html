@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Evidentiary Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a single-page vertical scroll experience with a sticky navigation bar. This structure guides the user through a logical narrative, from foundational principles to practical application and critical assessment. It begins with the 'Why' (Principles of Admissibility), moves to the 'How' (Legal Frameworks and Technical Procedures), and concludes with the 'What if' (Limitations). This thematic flow is more intuitive for learning than a linear report structure, using interactive cards, diagrams, and charts to encourage active exploration and reinforce key concepts about evidence integrity and credibility. -->
+    <!-- Visualization & Content Choices: 
+        - Principles of Admissibility -> Interactive Cards: To break down the four core principles into digestible, user-initiated chunks. (HTML/JS)
+        - Legal & Procedural Framework -> Interactive Diagram: To visually organize the complex hierarchy of laws and guidelines, showing their relationships. (HTML/CSS/JS Modal)
+        - Photographer's Checklist -> Interactive List with Tooltips: To link practical, in-the-field actions directly to their legal significance, enhancing understanding. (HTML/JS)
+        - Digital Integrity Workflow -> HTML/CSS Flowchart: To simplify and clarify the crucial but abstract process of creating master/working copies. (HTML/CSS/JS)
+        - Evidentiary Weight -> Bar Chart: To visualize the abstract concept of 'credibility' and how different factors contribute to the weight given to evidence in court. (Chart.js)
+        - This approach was chosen to make dense, technical information engaging and to illustrate relationships and processes that are hard to grasp from text alone, directly supporting the goal of user understanding. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #333333;
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .diagram-node {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .diagram-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .has-tooltip:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">📷 Evidential Photography</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#principles" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Principles</a>
+                        <a href="#frameworks" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Frameworks</a>
+                        <a href="#checklist" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Checklist</a>
+                        <a href="#integrity" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Integrity</a>
+                        <a href="#limitations" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Limitations</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 bg-white">
+            <div class="container mx-auto text-center px-4">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">The Journey of a Crime Scene Photograph</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">From the click of a shutter to the courtroom floor, every photographic exhibit must meet rigorous legal and technical standards. This guide provides an interactive exploration of the principles, procedures, and challenges of using photography as evidence in the UK Criminal Justice System.</p>
+            </div>
+        </section>
+
+        <section id="principles" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold tracking-tight text-gray-900">Foundations of Admissibility</h3>
+                    <p class="mt-2 text-lg text-gray-600">For a photograph to be accepted as evidence, it must pass four key tests. Click on each principle to learn more.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="principle-card bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer" data-title="Relevance" data-content="The photograph must logically relate to a fact that is in dispute in the case. It must make a material fact more or less probable. A photo of a weapon at the scene is relevant; a photo of an unrelated room may not be.">
+                        <h4 class="text-xl font-semibold text-blue-600">Relevance</h4>
+                        <p class="mt-2 text-gray-600">Does the photograph relate to the facts of the case?</p>
+                    </div>
+                    <div class="principle-card bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer" data-title="Authenticity" data-content="It must be proven that the photograph is a 'true and accurate representation' of the subject at the relevant time. This is typically established through witness testimony (often the photographer) and a documented, unbroken chain of custody.">
+                        <h4 class="text-xl font-semibold text-blue-600">Authenticity</h4>
+                        <p class="mt-2 text-gray-600">Is the photograph a genuine and fair depiction?</p>
+                    </div>
+                    <div class="principle-card bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer" data-title="Probative Value" data-content="Beyond just being relevant, the photograph must have the ability to help prove or disprove a fact. Its value in proving something must not be outweighed by its potential to unfairly prejudice the jury. Gruesome images, for example, must have significant probative value to be admitted.">
+                        <h4 class="text-xl font-semibold text-blue-600">Probative Value</h4>
+                        <p class="mt-2 text-gray-600">Does it help the court determine the truth?</p>
+                    </div>
+                    <div class="principle-card bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer" data-title="Non-Prejudicial" data-content="The photograph should not be presented in a way that is designed to illicit an emotional response or create unfair bias against the defendant. Its purpose is to provide factual information, not to inflame or shock the jury unnecessarily.">
+                        <h4 class="text-xl font-semibold text-blue-600">Freedom from Prejudice</h4>
+                        <p class="mt-2 text-gray-600">Is it factual and not unfairly biased?</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="frameworks" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold tracking-tight text-gray-900">The Legal & Procedural Framework</h3>
+                    <p class="mt-2 text-lg text-gray-600">The use of photographic evidence is governed by a complex web of laws and official guidelines. Explore the key sources of authority below.</p>
+                </div>
+                <div class="w-full text-center">
+                    <div class="inline-block p-4 bg-gray-800 text-white rounded-lg mb-8">
+                        <span class="font-bold text-xl">Photographic Evidence</span>
+                    </div>
+                    <div class="flex justify-center items-start space-x-4 md:space-x-12">
+                        <div class="w-1/3">
+                            <div class="diagram-node bg-blue-100 text-blue-800 p-4 rounded-lg shadow-lg" data-title="Key Legislation" data-content="<ul class='list-disc list-inside text-left space-y-2'><li><b>Police and Criminal Evidence Act (PACE) 1984:</b> Governs police powers, including the taking of photographs of detainees (S.64A) and the seizure/retention of evidence (S.21-22).</li><li><b>Criminal Procedure and Investigations Act (CPIA) 1996:</b> Sets out the rules for disclosure. All photographic material, whether used by the prosecution or not, must be retained and may need to be disclosed to the defence.</li><li><b>Civil Evidence Act 1995:</b> Governs the use of evidence in civil cases, including rules for hearsay and the need to give notice of evidence to other parties.</li></ul>">
+                                <span class="font-semibold">Legislation</span>
+                            </div>
+                        </div>
+                        <div class="w-1/3">
+                            <div class="diagram-node bg-green-100 text-green-800 p-4 rounded-lg shadow-lg" data-title="Official Guidelines" data-content="<ul class='list-disc list-inside text-left space-y-2'><li><b>ACPO/NPCC Principles:</b> Four core principles for handling all digital evidence. Key among them are 'Principle 1: No action should change data' and 'Principle 3: An audit trail must be created'.</li><li><b>Forensic Science Regulator (FSR) Code of Practice:</b> Now statutory, this code sets mandatory quality standards for all forensic science activities, including scene photography. It requires validated methods, competent personnel, and robust quality management systems.</li><li><b>Home Office & Police Force Policies:</b> Detailed Standard Operating Procedures (SOPs) that translate high-level principles into day-to-day actions for officers.</li></ul>">
+                                <span class="font-semibold">Guidelines</span>
+                            </div>
+                        </div>
+                        <div class="w-1/3">
+                           <div class="diagram-node bg-purple-100 text-purple-800 p-4 rounded-lg shadow-lg" data-title="Case Law Precedent" data-content="<ul class='list-disc list-inside text-left space-y-2'><li><b>R v Dodson & Fegan:</b> Affirmed the basic admissibility of photos for identification, leaving the weight of the evidence to the jury.</li><li><b>Castle v Cross:</b> Established the common law presumption that mechanical instruments (like cameras) are working correctly unless there is evidence to the contrary.</li><li><b>R v Clarke:</b> Established that expert evidence based on image analysis must be founded on a 'sufficiently reliable' scientific basis to be admissible.</li></ul>">
+                                <span class="font-semibold">Case Law</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="checklist" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold tracking-tight text-gray-900">The Photographer's On-Scene Checklist</h3>
+                    <p class="mt-2 text-lg text-gray-600">Technical excellence is not optional; it is essential for creating a fair and accurate record. Hover over each item to see its legal importance.</p>
+                </div>
+                <div class="max-w-3xl mx-auto space-y-4">
+                    <div class="has-tooltip relative flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+                        <span class="font-medium">Systematic Approach (Overall, Mid-range, Close-up)</span>
+                        <span class="text-gray-400 cursor-default">ⓘ</span>
+                        <div class="tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-800 text-white text-sm rounded-lg shadow-lg">Ensures evidence is contextualized. It demonstrates a methodical process, preventing claims that evidence was shown in isolation to mislead the court.</div>
+                    </div>
+                    <div class="has-tooltip relative flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+                        <span class="font-medium">Correct Use of Scales</span>
+                        <span class="text-gray-400 cursor-default">ⓘ</span>
+                        <div class="tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-800 text-white text-sm rounded-lg shadow-lg">Provides an undeniable reference for size. Must be level with the evidence and photographed from a 90° angle to prevent distortion and ensure accurate measurement.</div>
+                    </div>
+                    <div class="has-tooltip relative flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+                        <span class="font-medium">Optimal Focus & Depth of Field</span>
+                        <span class="text-gray-400 cursor-default">ⓘ</span>
+                        <div class="tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-800 text-white text-sm rounded-lg shadow-lg">Sharp focus is crucial for detail. A large depth of field (keeping foreground to background sharp) prevents accusations of deliberately obscuring information.</div>
+                    </div>
+                    <div class="has-tooltip relative flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+                        <span class="font-medium">Appropriate Lighting Techniques</span>
+                        <span class="text-gray-400 cursor-default">ⓘ</span>
+                        <div class="tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-800 text-white text-sm rounded-lg shadow-lg">Correct exposure ensures all detail is visible. Specialized lighting (e.g., oblique/low-angle) can reveal evidence like footwear impressions that would otherwise be invisible.</div>
+                    </div>
+                    <div class="has-tooltip relative flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+                        <span class="font-medium">Comprehensive, Contemporaneous Photo Log</span>
+                        <span class="text-gray-400 cursor-default">ⓘ</span>
+                        <div class="tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-800 text-white text-sm rounded-lg shadow-lg">This is the cornerstone of the audit trail. It records every detail of every shot, providing the context and proof of authenticity needed to withstand legal challenges.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="integrity" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold tracking-tight text-gray-900">Preserving Digital Integrity: The Master Copy Workflow</h3>
+                    <p class="mt-2 text-lg text-gray-600">In the digital age, proving an image hasn't been altered is critical. This workflow, mandated by guidelines, is the key to demonstrating integrity.</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                    <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
+                        <p class="font-semibold">1. Capture Image</p>
+                        <p class="text-sm text-gray-600">With a dedicated, correctly configured camera.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-400">→</div>
+                    <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
+                        <p class="font-semibold">2. Secure Download</p>
+                        <p class="text-sm text-gray-600">As soon as practicable, to a secure system.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-400">→</div>
+                    <div class="p-4 bg-yellow-100 border-2 border-yellow-400 rounded-lg shadow-lg">
+                        <p class="font-bold text-yellow-800">3. Create MASTER Copy</p>
+                        <p class="text-sm text-yellow-700">Unaltered original file, saved to WORM media (e.g., non-rewritable DVD). This is the pristine exhibit.</p>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-400">→</div>
+                    <div class="p-4 bg-blue-100 rounded-lg shadow-sm">
+                        <p class="font-semibold">4. Create WORKING Copies</p>
+                        <p class="text-sm text-gray-600">Duplicates of the master, used for analysis, printing, and presentation.</p>
+                    </div>
+                </div>
+                 <div class="mt-8 text-center max-w-2xl mx-auto p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+                    <p><strong class="font-bold">Critical Rule:</strong> The entire sequence of images taken at a scene must be preserved. Deleting "bad" photos (out of focus, accidental) breaks the chain of custody and can lead to accusations of evidence tampering.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="limitations" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold tracking-tight text-gray-900">Limitations & Courtroom Scrutiny</h3>
+                    <p class="mt-2 text-lg text-gray-600">Even perfect photographs have limitations and face challenges. Their credibility and evidential weight depend on multiple factors.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div>
+                        <h4 class="text-xl font-semibold mb-4 text-center">Inherent Limitations</h4>
+                        <ul class="space-y-3">
+                            <li class="bg-white p-4 rounded-lg shadow-sm"><b>2D Representation:</b> Flattens a 3D scene, potentially distorting depth and spatial relationships.</li>
+                            <li class="bg-white p-4 rounded-lg shadow-sm"><b>Static Moment:</b> Captures only an instant, showing no sequence of events or passage of time.</li>
+                            <li class="bg-white p-4 rounded-lg shadow-sm"><b>No Other Senses:</b> Cannot record sounds, smells, or temperatures that might be crucial to the investigation.</li>
+                             <li class="bg-white p-4 rounded-lg shadow-sm"><b>Potential for Misinterpretation:</b> Without context, a viewer (including a juror) can easily misunderstand what an image depicts.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold mb-4 text-center">Common Courtroom Challenges</h4>
+                        <ul class="space-y-3">
+                            <li class="bg-white p-4 rounded-lg shadow-sm"><b>Chain of Custody:</b> Any gap or weakness in the documented audit trail will be exploited to question integrity.</li>
+                            <li class="bg-white p-4 rounded-lg shadow-sm"><b>Technical Flaws:</b> Poor focus, bad exposure, or distortion can be argued to make the photo an unfair or inaccurate record.</li>
+                            <li class="bg-white p-4 rounded-lg shadow-sm"><b>Enhancement vs. Manipulation:</b> The defence will scrutinize any digital processing, arguing it altered the evidence rather than just clarifying it.</li>
+                            <li class="bg-white p-4 rounded-lg shadow-sm"><b>Lack of Corroboration:</b> A photograph alone is rarely enough; it must be supported by witness testimony, expert analysis, or other evidence.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-12">
+                    <h4 class="text-xl font-semibold mb-4 text-center">Factors Affecting Evidentiary Weight in Court</h4>
+                    <div class="chart-container">
+                        <canvas id="limitationsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>This interactive guide is based on materials from the BTEC Level 3 National Extended Diploma in Forensic and Criminal Investigation and established UK legal principles.</p>
+            <p class="text-sm mt-2 text-gray-400">Application created for educational purposes.</p>
+        </div>
+    </footer>
+
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 opacity-0 pointer-events-none z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl transform transition-all" id="modal-content">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modal-title" class="text-xl font-semibold"></h3>
+                <button id="modal-close" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <div id="modal-body" class="p-6">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main > section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.hash === `#${id}`);
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalClose = document.getElementById('modal-close');
+
+            const openModal = (title, content) => {
+                modalTitle.textContent = title;
+                modalBody.innerHTML = content;
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+            };
+
+            const closeModal = () => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            };
+
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.querySelectorAll('.principle-card, .diagram-node').forEach(card => {
+                card.addEventListener('click', () => {
+                    openModal(card.dataset.title, card.dataset.content);
+                });
+            });
+
+            const ctx = document.getElementById('limitationsChart').getContext('2d');
+            const limitationsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Technical Quality', 
+                        'Chain of Custody', 
+                        'Corroborating Evidence', 
+                        'Clarity of Context',
+                        'Adherence to Procedure'
+                    ],
+                    datasets: [{
+                        label: 'Impact on Evidentiary Weight',
+                        data: [90, 95, 80, 75, 85],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(239, 68, 68, 0.6)',
+                            'rgba(249, 115, 22, 0.6)',
+                            'rgba(139, 92, 246, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(249, 115, 22, 1)',
+                            'rgba(139, 92, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                             grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: {
+                             grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const tooltips = {
+                                        'Technical Quality': 'High quality (focus, exposure) inspires confidence. Flaws create reasonable doubt.',
+                                        'Chain of Custody': 'An unbroken, well-documented chain is paramount. Gaps severely undermine integrity.',
+                                        'Corroborating Evidence': 'Photos are powerful but rarely stand alone. Their weight increases with supporting testimony and analysis.',
+                                        'Clarity of Context': 'Photos must be clearly explained. Without context from logs and testimony, they can be misinterpreted.',
+                                        'Adherence to Procedure': 'Following FSR and ACPO/NPCC rules shows professionalism and reliability. Deviations will be challenged.'
+                                    };
+                                    return tooltips[context.label] || '';
+                                }
+                            },
+                            bodyFont: { size: 12 },
+                            padding: 10,
+                            displayColors: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
